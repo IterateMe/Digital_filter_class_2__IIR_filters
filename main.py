@@ -117,7 +117,7 @@ def IIR_chebychev_1(image=None):
     print("Ordre du filtre IIR chebychev_1 : {}".format(order))
 
     b, a = signal.cheby1(order, gain_pass, wn*fs/(2*np.pi), btype='low', output='ba', fs=fs)
-    zp.zplane(b, a)
+
     W, H = signal.freqz(b=b, a=a)
 
     plt.plot((W*fs/(2*np.pi)), 20*np.log10(np.abs(H)))
@@ -125,7 +125,7 @@ def IIR_chebychev_1(image=None):
     plt.ylabel("Amplitude (Db)")
     plt.title("Réponse en fréquence du filtre IIR chebychev_1")
     plt.show()
-
+    zp.zplane(b, a)
     if image is not None:
         response = signal.lfilter(b, a, image)
         return response
@@ -142,14 +142,14 @@ def IIR_chebychev_2(image=None):
     rp = 0.0001
 
     b, a = signal.cheby2(order, gain_pass, wn*fs/(2*np.pi), btype='lowpass', analog=False, output='ba', fs=fs)
-    zp.zplane(b, a)
+
     W, H = signal.freqz(b=b, a=a)
     plt.plot((W*fs/(2*np.pi)), 20*np.log10(np.abs(H)))
     plt.xlabel("Frequence (Hz)")
     plt.ylabel("Amplitude (Db)")
     plt.title("Réponse en fréquence du filtre IIR chebychev_2")
     plt.show()
-
+    zp.zplane(b, a)
     if image is not None:
         response = signal.lfilter(b, a, image)
         return response
@@ -165,7 +165,7 @@ def IIR_elliptic(image=None):
     order, wn = signal.ellipord(wp, ws, gain_pass, gain_cut, fs)
     print("Ordre du filtre IIR Eliptique : {}".format(order))
     b, a = signal.ellip(order, gain_pass, gain_cut, (wn*fs/(2*np.pi)), btype='lowpass', output='ba', fs=fs)
-    zp.zplane(b, a)
+
     W, H = signal.freqz(b=b, a=a)
 
     plt.plot((W * fs / (2 * np.pi)), 20 * np.log10(np.abs(H)))
@@ -173,7 +173,7 @@ def IIR_elliptic(image=None):
     plt.ylabel("Amplitude (Db)")
     plt.title("Réponse en fréquence du filtre IIR eliptique")
     plt.show()
-
+    zp.zplane(b, a)
     if image is not None:
         response = signal.lfilter(b, a, image)
         return response
@@ -188,7 +188,7 @@ def home_made_IIR(image):
     num = np.array([(c/(a**2 + a*b + c)), 2*(c/(a**2 + a*b + c)), (c/(a**2 + a*b + c))])
     denum = np.array([1, ( (2*c-2*(a**2))/(a**2 + a*b + c) ), ( (a**2 + c - a*b)/(a**2 + a*b + c) )])
 
-    zp.zplane(num, denum)
+
 
     W, H = signal.freqz(b=num, a=denum)
     plt.plot((W*fs/(2*np.pi)), 20*np.log10(np.abs(H)))
@@ -197,7 +197,7 @@ def home_made_IIR(image):
     plt.title("Réponse en fréquence du filtre IIR fait main")
     plt.show()
     response = signal.lfilter(num, denum, image)
-
+    zp.zplane(num, denum)
     return response
 
 def compress(image,pct):
