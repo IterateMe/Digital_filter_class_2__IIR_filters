@@ -82,7 +82,7 @@ def get_ws_wp(band_pass, band_cut):
     wp = 2*np.pi*band_cut/fs
     return ws, wp
 
-def IIR_butterworth(image):
+def IIR_butterworth(image=None):
     band_pass = 500
     band_cut = 750
     gain_pass = 0.2
@@ -91,51 +91,71 @@ def IIR_butterworth(image):
 
     order, wn = signal.buttord(wp, ws, gain_pass, gain_cut)
 
+    print("Ordre du filtre IIR butterworth : {}".format(order))
+
     b, a = signal.butter(order, wn)
     W, H = signal.freqz(b=b, a=a)
+
+    plt.plot((W*fs/(2*np.pi)), 20*np.log10(np.abs(H)))
+    plt.xlabel("Frequence (Hz)")
+    plt.ylabel("Amplitude (Db)")
+    plt.title("Réponse en fréquence du filtre IIR butterworth")
+    plt.show()
+
     zp.zplane(b, a)
-    response = signal.lfilter(b, a, image)
+    if image is not None:
+        response = signal.lfilter(b, a, image)
+        return response
 
-    return response
-
-def IIR_chebychev_1(image):
+def IIR_chebychev_1(image=None):
     band_pass = 500
     band_cut = 750
     gain_pass = 0.2
     gain_cut = 60
     ws, wp = get_ws_wp(band_pass, band_cut)
     order, wn = signal.cheb1ord(wp, ws, gain_pass, gain_cut)
-    rp = 0.0000001
+    print("Ordre du filtre IIR chebychev_1 : {}".format(order))
 
     b, a = signal.cheby1(order, gain_pass, wn*fs/(2*np.pi), btype='low', output='ba', fs=fs)
     zp.zplane(b, a)
     W, H = signal.freqz(b=b, a=a)
 
-    response = signal.lfilter(b, a, image)
+    plt.plot((W*fs/(2*np.pi)), 20*np.log10(np.abs(H)))
+    plt.xlabel("Frequence (Hz)")
+    plt.ylabel("Amplitude (Db)")
+    plt.title("Réponse en fréquence du filtre IIR chebychev_1")
+    plt.show()
 
-    return response
+    if image is not None:
+        response = signal.lfilter(b, a, image)
+        return response
 
 
-def IIR_chebychev_2(image):
+def IIR_chebychev_2(image=None):
     band_pass = 500
     band_cut = 750
     gain_pass = 0.2
     gain_cut = 60
     ws, wp = get_ws_wp(band_pass, band_cut)
     order, wn = signal.cheb2ord(wp, ws, gain_pass, gain_cut)
-
+    print("Ordre du filtre IIR chebychev_2 : {}".format(order))
     rp = 0.0001
 
     b, a = signal.cheby2(order, gain_pass, wn*fs/(2*np.pi), btype='lowpass', analog=False, output='ba', fs=fs)
     zp.zplane(b, a)
     W, H = signal.freqz(b=b, a=a)
+    plt.plot((W*fs/(2*np.pi)), 20*np.log10(np.abs(H)))
+    plt.xlabel("Frequence (Hz)")
+    plt.ylabel("Amplitude (Db)")
+    plt.title("Réponse en fréquence du filtre IIR chebychev_2")
+    plt.show()
 
-    response = signal.lfilter(b, a, image)
+    if image is not None:
+        response = signal.lfilter(b, a, image)
+        return response
 
-    return response
 
-
-def IIR_elliptic(image):
+def IIR_elliptic(image=None):
     band_pass = 500
     band_cut = 750
     gain_pass = 0.2
@@ -143,13 +163,20 @@ def IIR_elliptic(image):
     ws, wp = get_ws_wp(band_pass, band_cut)
     print(wp,ws)
     order, wn = signal.ellipord(wp, ws, gain_pass, gain_cut, fs)
+    print("Ordre du filtre IIR Eliptique : {}".format(order))
     b, a = signal.ellip(order, gain_pass, gain_cut, (wn*fs/(2*np.pi)), btype='lowpass', output='ba', fs=fs)
     zp.zplane(b, a)
     W, H = signal.freqz(b=b, a=a)
 
-    response = signal.lfilter(b, a, image)
+    plt.plot((W * fs / (2 * np.pi)), 20 * np.log10(np.abs(H)))
+    plt.xlabel("Frequence (Hz)")
+    plt.ylabel("Amplitude (Db)")
+    plt.title("Réponse en fréquence du filtre IIR eliptique")
+    plt.show()
 
-    return response
+    if image is not None:
+        response = signal.lfilter(b, a, image)
+        return response
 
 def home_made_IIR(image):
     wd = 2 * np.pi * 500 / 1600     # frequence normalisée
@@ -163,11 +190,17 @@ def home_made_IIR(image):
 
     zp.zplane(num, denum)
 
+    W, H = signal.freqz(b=num, a=denum)
+    plt.plot((W*fs/(2*np.pi)), 20*np.log10(np.abs(H)))
+    plt.xlabel("Frequence (Hz)")
+    plt.ylabel("Amplitude (Db)")
+    plt.title("Réponse en fréquence du filtre IIR fait main")
+    plt.show()
     response = signal.lfilter(num, denum, image)
 
     return response
 
-def compress(image):
+def compress(image,pct):
 
 
     cov = np.cov(image)
@@ -180,37 +213,52 @@ def compress(image):
     vec_len = len(newimage[0])
     img_len = len(newimage)
     for i in range(img_len):
-        if i<img_len*30//100:
-            continue
-        else:
+        if i>img_len*(100-pct)//100:
             newimage[i] = np.zeros(vec_len)
+
     return newimage, eigenvector
 
 def reverse_compress(img, eigenvector):
     O_G = eigenvector.dot(img)
     return O_G
 
-def test_retirer_bruit():
+def determiner_plus_petit_ordre():
+    IIR_elliptic()
+    IIR_butterworth()
+    IIR_chebychev_1()
+    IIR_chebychev_2()
+
+def test_retirer_bruit_bilineaire():
     img = get_np_array(GOLDHILL_BRUIT)
     img = home_made_IIR(img)
     plt.imshow(img, interpolation='nearest')
     plt.show()
 
+def test_retirer_bruit_python():
+    img = get_np_array(GOLDHILL_BRUIT)
+    img = IIR_chebychev_1(img)
+    plt.imshow(img, interpolation='nearest')
+    plt.show()
+
 def test_rotate():
     img = get_png_array(GOLDHILL_ROTATE)
+    plt.imshow(img, interpolation='nearest')
+    plt.show()
     img = rotate_90_left(img)
     plt.imshow(img, interpolation='nearest')
     plt.show()
 
 def test_retirer_abheration():
     img = get_np_array(ABERRATIONS)
+    plt.imshow(img, interpolation='nearest')
+    plt.show()
     img = H_z_reverse(img)
     plt.imshow(img, interpolation='nearest')
     plt.show()
 
-def test_compress():
+def test_compress(pct):
     img = get_png_array(GOLDHILL_ROTATE)
-    img, eigen = compress(img)
+    img, eigen = compress(img,pct)
     plt.imshow(img, interpolation='nearest')
     plt.show()
     img = reverse_compress(img, eigen)
@@ -218,29 +266,16 @@ def test_compress():
     plt.show()
 
 if __name__ == '__main__':
+    # determiner_plus_petit_ordre()
     # test_retirer_abheration()
-    test_compress()
-    # W, H = IIR_elliptic()
-    # plt.plot((W*fs/(2*np.pi)), np.abs(H))
-    # plt.show()
-
-    # img = get_np_array(GOLDHILL_BRUIT)
-    #
-    # plt.imshow(img, interpolation='nearest')
-    # plt.show()
-    #
-    # img = IIR_elliptic(img)
+    # test_rotate()
+    # test_retirer_bruit_bilineaire()
+    # test_retirer_bruit_python()
+    # test_compress(50)
+    # test_compress(70)
+    pass
 
 
-
-    #
-    # img = reverse_compress(img, eigen)
-    # plt.imshow(img, interpolation='nearest')
-    # plt.show()
-    #
-    # img = IIR_elliptic(img)
-    # plt.imshow(img, interpolation='nearest')
-    # plt.show()
 
 
 
