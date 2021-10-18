@@ -15,14 +15,17 @@ GOLDHILL_BRUIT  = "C:\\Users\\15142\\Desktop\\S5_APP4\\Digital_filter_class_2__I
 GOLDHILL_ROTATE = "C:\\Users\\15142\\Desktop\\S5_APP4\\Digital_filter_class_2__IIR_filters\\images\\goldhill_rotate.png"
 IMG_COMPLETE    = "C:\\Users\\15142\\Desktop\\S5_APP4\\Digital_filter_class_2__IIR_filters\\images\\image_complete.npy"
 
+
 def get_png_array(filename):
     matplotlib.pyplot.gray()
     img_couleur = matplotlib.image.imread(filename)
     img_gris = np.mean(img_couleur, -1)
+    print(img_gris)
     return img_gris
 
 def get_np_array(filename):
     img_array = np.load(filename)
+    print(img_array)
     return img_array
 
 reverse_H_z = 0
@@ -52,7 +55,7 @@ def get_ws_wp(band_pass, band_cut):
     wp = 2*np.pi*band_cut/fs
     return ws, wp
 
-def IIR_butterworth():
+def IIR_butterworth(image):
     band_pass = 500
     band_cut = 750
     gain_pass = 0.2
@@ -64,9 +67,11 @@ def IIR_butterworth():
     b, a = signal.butter(order, wn)
     W, H = signal.freqz(b=b, a=a)
 
-    return W, H
+    response = signal.lfilter(b, a, image)
 
-def IIR_chebychev_1():
+    return response
+
+def IIR_chebychev_1(image):
     band_pass = 500
     band_cut = 750
     gain_pass = 0.2
@@ -79,9 +84,12 @@ def IIR_chebychev_1():
 
     W, H = signal.freqz(b=b, a=a)
 
-    return W, H
+    response = signal.lfilter(b, a, image)
 
-def IIR_chebychev_2():
+    return response
+
+
+def IIR_chebychev_2(image):
     band_pass = 500
     band_cut = 750
     gain_pass = 0.2
@@ -95,9 +103,12 @@ def IIR_chebychev_2():
 
     W, H = signal.freqz(b=b, a=a)
 
-    return W, H
+    response = signal.lfilter(b, a, image)
 
-def IIR_elliptic():
+    return response
+
+
+def IIR_elliptic(image):
     band_pass = 500
     band_cut = 750
     gain_pass = 0.2
@@ -109,7 +120,9 @@ def IIR_elliptic():
 
     W, H = signal.freqz(b=b, a=a)
 
-    return W, H
+    response = signal.lfilter(b, a, image)
+
+    return response
 
 def home_made_IIR(image):
     a = 2*fs
@@ -123,22 +136,49 @@ def home_made_IIR(image):
 
     return response
 
+def compress(image):
+    cov = np.cov(image)
+    eigenvalues, eigenvector = np.linalg.eig(cov)
+    # matrice_transfo = np.zeros(len(eigenvector))
+    #
+    # for n in eigenvector:
+    #     matrice_transfo[n] = eigenvector[n]
+
+    print("eigenV =\n", eigenvector, "LEN:\n", len(eigenvector))
+    trans_eigenvec = np.transpose(eigenvector)
+    newimage = trans_eigenvec.dot(image)
+    return newimage, eigenvector
+
+def reverse_compress(img, eigenvector):
+    O_G = eigenvector.dot(img)
+    return O_G
+
 
 if __name__ == '__main__':
     # W, H = IIR_elliptic()
     # plt.plot((W*fs/(2*np.pi)), np.abs(H))
     # plt.show()
 
-    img = get_np_array(GOLDHILL_BRUIT)
+    # img = get_np_array(GOLDHILL_BRUIT)
+    #
+    # plt.imshow(img, interpolation='nearest')
+    # plt.show()
+    #
+    # img = IIR_elliptic(img)
 
 
+    img = get_png_array(GOLDHILL_ROTATE)
+    img, eigen = compress(img)
+    plt.imshow(img, interpolation='nearest')
+    plt.show()
 
+    img = reverse_compress(img, eigen)
     plt.imshow(img, interpolation='nearest')
     plt.show()
 
     # img = get_png_array(GOLDHILL_ROTATE)
     # img = rotate_90_left(img)
-    #
-    # plt.imshow(img, interpolation='nearest')
-    # plt.show()
+
+
+
 
