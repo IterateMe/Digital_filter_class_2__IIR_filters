@@ -58,19 +58,6 @@ def H_z_reverse(image):
 
     return response
 
-def retirerBruitHF(image):
-    f_cd = 500 # Hz
-    f_s = 1600 # Hz
-    w_d = 2 * np.pi * (f_cd/f_s)
-    w_a = 2 * f_s * np.tan(w_d/2)
-    a = 2*f_s/w_a
-    b = np.sqrt(2)
-    c = 1
-    num = [(c/(a*a+a*b+c)), (2*c/(a*a+a*b+c)), (c/(a*a+a*b+c))]
-    den = [1, ((2*c - 2*a*a)/(a*a+a*b+c)), ((a*a-a*b+c)/(a*a+a*b+c))]
-    image = signal.lfilter(num,den,image)
-    return image
-
 # def counter_warp(fe,fs):
 #     We = 2*np.pi * fe/fs
 #     Wa = 2*fs*np.tan(We/2)
@@ -265,14 +252,29 @@ def test_compress(pct):
     plt.imshow(img, interpolation='nearest')
     plt.show()
 
+def test_image_complete():
+    img = get_np_array(IMG_COMPLETE)
+    plt.imshow(img, interpolation='nearest')
+    plt.show()
+    img = H_z_reverse(img)
+    plt.imshow(img, interpolation='nearest')
+    plt.show()
+    img = home_made_IIR(img)
+    plt.imshow(img, interpolation='nearest')
+    plt.show()
+    img = rotate_90_left(img)
+    plt.imshow(img, interpolation='nearest')
+    plt.show()
+
 if __name__ == '__main__':
     # determiner_plus_petit_ordre()
-    test_retirer_abheration()
+    # test_retirer_abheration()
     # test_rotate()
     # test_retirer_bruit_bilineaire()
     # test_retirer_bruit_python()
     # test_compress(50)
     # test_compress(70)
+    test_image_complete()
     pass
 
 
