@@ -10,10 +10,10 @@ import zplane as zp
 
 fs = 1600
 
-ABERRATIONS     = "C:\\Users\\15142\\Desktop\\S5_APP4\\Digital_filter_class_2__IIR_filters\\images\\goldhill_aberrations.npy"
-GOLDHILL_BRUIT  = "C:\\Users\\15142\\Desktop\\S5_APP4\\Digital_filter_class_2__IIR_filters\\images\\goldhill_bruit.npy"
-GOLDHILL_ROTATE = "C:\\Users\\15142\\Desktop\\S5_APP4\\Digital_filter_class_2__IIR_filters\\images\\goldhill_rotate.png"
-IMG_COMPLETE    = "C:\\Users\\15142\\Desktop\\S5_APP4\\Digital_filter_class_2__IIR_filters\\images\\image_complete.npy"
+ABERRATIONS     = "images\\goldhill_aberrations.npy"
+GOLDHILL_BRUIT  = "images\\goldhill_bruit.npy"
+GOLDHILL_ROTATE = "images\\goldhill_rotate.png"
+IMG_COMPLETE    = "images\\image_complete.npy"
 
 
 
@@ -267,7 +267,7 @@ def test_compress(pct):
 
 if __name__ == '__main__':
     # determiner_plus_petit_ordre()
-    # test_retirer_abheration()
+    test_retirer_abheration()
     # test_rotate()
     # test_retirer_bruit_bilineaire()
     # test_retirer_bruit_python()
